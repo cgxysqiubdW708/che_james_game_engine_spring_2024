@@ -47,6 +47,7 @@ class Game:
     def new(self):
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.coins = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -61,7 +62,10 @@ class Game:
                     Wall(self, col, row)
                 # "p" caracter in map.txt defines the location of the player
                 if tile == 'p':
-                   self.player1 =  Player(self, col, row)
+                   print("aaa")
+                   self.player1 = Player(self, col, row)
+                if tile == 'c':
+                    Coin(self, col, row)
 
     def run(self):
         # function to run the game

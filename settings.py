@@ -16,6 +16,7 @@ TILESIZE = 32
 # define RGB values for color variables used in the game
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 LIGHTGREY = (150, 150, 150)
 BGCOLOR = (0, 0, 0)
 
