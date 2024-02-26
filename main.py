@@ -48,6 +48,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
+        self.power_ups = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -106,9 +107,15 @@ class Game:
             if event.type == pg.QUIT:
                 self.quit()
         # code to handle key presses
-            # if event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_a:
-            #         self.player1.move(dx=-1)
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    self.vx = PLAYER_SPEED * 2
+                    self.vy = PLAYER_SPEED * 2
+                    self.player1.image.fill(BLUE)
+                if event.key == pg.K_1:
+                    self.vx = PLAYER_SPEED
+                    self.vy = PLAYER_SPEED
+                    self.player1.image.fill(GREEN)
             #     if event.key == pg.K_d:
             #         self.player1.move(dx=+1)
             #     if event.key == pg.K_w:
