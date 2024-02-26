@@ -64,7 +64,8 @@ class Player(pg.sprite.Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
-    
+                
+    # made possible by Aayush's question!
     def collide_with_group(self, group, kill):
             hits = pg.sprite.spritecollide(self, group, kill)
             if hits:
@@ -82,6 +83,7 @@ class Player(pg.sprite.Sprite):
         # add collision later
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
+        self.collide_with_group(self.game.power_ups, True)
 
         coin_hits = pg.sprite.spritecollide(self, self.game.coins, True)
         if coin_hits:
