@@ -74,7 +74,7 @@ class Player(pg.sprite.Sprite):
                     self.moneybag += 1
                 if str(hits[0].__class__.__name__) == "Powerup":
                     print(hits[0].__class__.__name__)
-                    self.speed = 600
+                    self.speed *= 3
 
     def update(self):
         self.get_keys()
