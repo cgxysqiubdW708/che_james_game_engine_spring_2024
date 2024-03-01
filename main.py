@@ -13,6 +13,15 @@ from sprites import *
 from random import randint
 import sys
 from os import path
+import random
+
+ranmap = random.randint(0, 1)
+mapfile = ''
+if (ranmap == 0):
+    mapfile = 'map.txt'
+
+if (ranmap == 1):
+    mapfile = 'map2.txt'
 
 # Define game class...
 class Game:
@@ -45,7 +54,7 @@ class Game:
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
+        with open(path.join(game_folder, mapfile), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)

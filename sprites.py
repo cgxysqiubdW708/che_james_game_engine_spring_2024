@@ -75,6 +75,9 @@ class Player(pg.sprite.Sprite):
                 if str(hits[0].__class__.__name__) == "Powerup":
                     print(hits[0].__class__.__name__)
                     self.speed *= 3.5
+                if str(hits[0].__class__.__name__) == "Mob":
+                    print(hits[0].__class__.__name__)
+                    self.speed = 150
 
     def update(self):
         self.get_keys()
@@ -132,6 +135,8 @@ class Powerup(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# Mob code from Mr. Cozort's code
+        
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -165,13 +170,13 @@ class Mob(pg.sprite.Sprite):
         self.y += self.vy * self.game.dt
         
         if self.rect.x < self.game.player1.rect.x:
-            self.vx = 200
+            self.vx = 100
         if self.rect.x > self.game.player1.rect.x:
-            self.vx = -200    
+            self.vx = -100    
         if self.rect.y < self.game.player1.rect.y:
-            self.vy = 200
+            self.vy = 100
         if self.rect.y > self.game.player1.rect.y:
-            self.vy = -200
+            self.vy = -100
         self.rect.x = self.x
         self.collide_with_walls('x')
         self.rect.y = self.y
