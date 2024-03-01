@@ -5,7 +5,7 @@ WIDTH = 1024
 HEIGHT = 768
 
 # set frames per second
-FPS = 30
+FPS = 60
 
 # define the title of the game
 TITLE = "My Fun Game"
