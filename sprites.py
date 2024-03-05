@@ -3,6 +3,7 @@
 
 import pygame as pg
 from settings import *
+from random import choice
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -18,6 +19,8 @@ class Player(pg.sprite.Sprite):
         self.y = y * TILESIZE
         self.moneybag = 0
         self.speed = 300
+        self.status = ''
+        self.hitpoints = 100
         
     
     def get_keys(self):
@@ -74,10 +77,17 @@ class Player(pg.sprite.Sprite):
                     self.moneybag += 1
                 if str(hits[0].__class__.__name__) == "Powerup":
                     print(hits[0].__class__.__name__)
-                    self.speed *= 3.5
+                    if(choice(POWER_UP_EFFECTS) == "Speed"):
+                        self.speed *= 3.5
+                    if(choice(POWER_UP_EFFECTS) == "Size"):
+                        self.rect.x /= 2
+                        self.rect.y /= 2
                 if str(hits[0].__class__.__name__) == "Mob":
                     print(hits[0].__class__.__name__)
+                    self.hitpoints -= 1
                     self.speed = 150
+                    if(self.status == 'Invincible'):
+                        print("you cant hurt me")
 
     def update(self):
         self.get_keys()
@@ -134,6 +144,19 @@ class Powerup(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+# class Powerup1(pg.sprite.Sprite):
+#     def __init__(self, game, x, y):
+#         self.groups = game.all_sprites, game.power_ups
+#         pg.sprite.Sprite.__init__(self, self.groups)
+#         self.game = game
+#         self.image = pg.Surface((TILESIZE, TILESIZE))
+#         self.image.fill(ORANGE)
+#         self.rect = self.image.get_rect()
+#         self.x = x
+#         self.y = y
+#         self.rect.x = x * TILESIZE
+#         self.rect.y = y * TILESIZE
 
 # Mob code from Mr. Cozort's code
         

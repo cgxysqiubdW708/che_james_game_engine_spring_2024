@@ -20,6 +20,9 @@ BLUE = (0, 0, 255)
 LIGHTGREY = (150, 150, 150)
 BGCOLOR = (0, 0, 0)
 YELLOW = (255, 255, 0)
+ORANGE = (255, 165, 0)
+
+POWER_UP_EFFECTS = ["Speed", "Size"]
 
 # Player settings
 PLAYER_SPEED = 300
