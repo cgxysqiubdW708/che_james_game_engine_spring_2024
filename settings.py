@@ -22,7 +22,7 @@ BGCOLOR = (0, 0, 0)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 
-POWER_UP_EFFECTS = ["Speed", "Size"]
+POWER_UP_EFFECTS = ["Speed", "Camo"]
 
 # Player settings
 PLAYER_SPEED = 300

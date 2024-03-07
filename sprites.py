@@ -7,6 +7,8 @@ from random import choice
 
 # player sprite
 
+mobcamo = False
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -23,7 +25,6 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.status = ''
         self.hitpoints = 100
-        
     
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -73,6 +74,7 @@ class Player(pg.sprite.Sprite):
 
     # made possible by Aayush's question!
     def collide_with_group(self, group, kill):
+            global mobcamo
             hits = pg.sprite.spritecollide(self, group, kill)
             if hits:
                 if str(hits[0].__class__.__name__) == "Coin":
@@ -81,9 +83,9 @@ class Player(pg.sprite.Sprite):
                     print(hits[0].__class__.__name__)
                     if(choice(POWER_UP_EFFECTS) == "Speed"):
                         self.speed *= 3.5
-                    if(choice(POWER_UP_EFFECTS) == "Size"):
-                        self.rect.x /= 2
-                        self.rect.y /= 2
+                    if(choice(POWER_UP_EFFECTS) == "Camo"):
+                        mobcamo = True
+                        self.image.fill(RED)
                 if str(hits[0].__class__.__name__) == "Mob":
                     print(hits[0].__class__.__name__)
                     self.hitpoints -= 1
@@ -190,19 +192,22 @@ class Mob(pg.sprite.Sprite):
                 self.vy *= -1
                 self.rect.y = self.y
     def update(self):
-        # self.rect.x += 1
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
-        
-        if self.rect.x < self.game.player1.rect.x:
-            self.vx = 100
-        if self.rect.x > self.game.player1.rect.x:
-            self.vx = -100    
-        if self.rect.y < self.game.player1.rect.y:
-            self.vy = 100
-        if self.rect.y > self.game.player1.rect.y:
-            self.vy = -100
-        self.rect.x = self.x
-        self.collide_with_walls('x')
-        self.rect.y = self.y
-        self.collide_with_walls('y')
+        if mobcamo == False:
+            # self.rect.x += 1
+            self.x += self.vx * self.game.dt
+            self.y += self.vy * self.game.dt
+            
+            if self.rect.x < self.game.player1.rect.x:
+                self.vx = 100
+            if self.rect.x > self.game.player1.rect.x:
+                self.vx = -100    
+            if self.rect.y < self.game.player1.rect.y:
+                self.vy = 100
+            if self.rect.y > self.game.player1.rect.y:
+                self.vy = -100
+            self.rect.x = self.x
+            self.collide_with_walls('x')
+            self.rect.y = self.y
+            self.collide_with_walls('y')
+        elif mobcamo == True:
+            pass
