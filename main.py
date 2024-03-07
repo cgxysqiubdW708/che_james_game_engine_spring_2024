@@ -56,7 +56,7 @@ class Game:
         '''
         with open(path.join(game_folder, mapfile), 'rt') as f:
             for line in f:
-                print(line)
+                # print(line)
                 self.map_data.append(line)
 
     # Create run method which runs the whole GAME
@@ -73,16 +73,16 @@ class Game:
         #     Wall(self, x, 5)
         # code to add walls and render player
         for row, tiles in enumerate(self.map_data):
-            print(row)
+            # print(row)
             for col, tile in enumerate(tiles):
-                print(col)
+                # print(col)
                 # "1" character in map.txt creates a wall
                 if tile == '1':
-                    print("a wall at", row, col)
+                    # print("a wall at", row, col)
                     Wall(self, col, row)
                 # "p" caracter in map.txt defines the location of the player
                 if tile == 'p':
-                   print("aaa")
+                #    print("aaa")
                    self.player1 = Player(self, col, row)
                 if tile == 'c':
                     Coin(self, col, row)
