@@ -53,6 +53,7 @@ class Player(pg.sprite.Sprite):
     #             return True
     #     return False
             
+    # wall collision code
     def collide_with_walls(self, dir):
         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -74,9 +75,11 @@ class Player(pg.sprite.Sprite):
                 self.rect.y = self.y
 
     # made possible by Aayush's question!
+    # collision code
     def collide_with_group(self, group, kill):
             global mobcamo
             hits = pg.sprite.spritecollide(self, group, kill)
+            # code for collisions
             if hits:
                 if str(hits[0].__class__.__name__) == "Coin":
                     self.moneybag += 1
@@ -99,7 +102,8 @@ class Player(pg.sprite.Sprite):
                     self.speed = 150
                     if(self.status == 'Invincible'):
                         print("you cant hurt me")
-
+    
+    # sprite updates
     def update(self):
         self.get_keys()
         self.x += self.vx * self.game.dt
