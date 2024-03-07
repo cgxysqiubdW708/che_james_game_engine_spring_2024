@@ -61,6 +61,7 @@ class Game:
 
     # Create run method which runs the whole GAME
     def new(self):
+        self.cooldown = Timer(self)
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
@@ -108,6 +109,7 @@ class Game:
 
     # function to update the game
     def update(self):
+        self.cooldown.ticking()
         self.all_sprites.update()
     
     # function to draw the grid on the game

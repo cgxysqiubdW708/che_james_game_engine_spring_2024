@@ -4,6 +4,7 @@
 import pygame as pg
 from settings import *
 from random import choice
+from utils import *
 
 # player sprite
 
@@ -84,8 +85,12 @@ class Player(pg.sprite.Sprite):
                     if(choice(POWER_UP_EFFECTS) == "Speed"):
                         self.speed *= 3.5
                     if(choice(POWER_UP_EFFECTS) == "Camo"):
+                        self.game.cooldown.cd = 5
                         mobcamo = True
                         self.image.fill(RED)
+                        if self.game.cooldown.cd < 1:
+                            mobcamo = False
+                            self.image.fill(GREEN)
                 if str(hits[0].__class__.__name__) == "Mob":
                     print(hits[0].__class__.__name__)
                     self.hitpoints -= 1
@@ -210,4 +215,21 @@ class Mob(pg.sprite.Sprite):
             self.rect.y = self.y
             self.collide_with_walls('y')
         elif mobcamo == True:
-            pass
+            if self.game.cooldown.cd < 1:
+                pass
+            if self.game.cooldown.cd < 1:
+                            self.x += self.vx * self.game.dt
+            self.y += self.vy * self.game.dt
+            
+            if self.rect.x < self.game.player1.rect.x:
+                self.vx = 100
+            if self.rect.x > self.game.player1.rect.x:
+                self.vx = -100    
+            if self.rect.y < self.game.player1.rect.y:
+                self.vy = 100
+            if self.rect.y > self.game.player1.rect.y:
+                self.vy = -100
+            self.rect.x = self.x
+            self.collide_with_walls('x')
+            self.rect.y = self.y
+            self.collide_with_walls('y')
