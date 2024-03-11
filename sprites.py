@@ -10,8 +10,14 @@ from utils import *
 
 mobcamo = False
 
+spawnx = 0
+spawny = 0
+
+invincible = False
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
+        global spawnx, spawny
         self.groups = game.all_sprites
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -21,7 +27,9 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
+        spawnx = self.x
         self.y = y * TILESIZE
+        spawny = self.y
         self.moneybag = 0
         self.speed = 300
         self.status = ''
@@ -78,30 +86,49 @@ class Player(pg.sprite.Sprite):
     # collision code
     def collide_with_group(self, group, kill):
             global mobcamo
+            global invincible
             hits = pg.sprite.spritecollide(self, group, kill)
             # code for collisions
             if hits:
                 if str(hits[0].__class__.__name__) == "Coin":
                     self.moneybag += 1
                 if str(hits[0].__class__.__name__) == "Powerup":
-                    print(hits[0].__class__.__name__)
                     if(choice(POWER_UP_EFFECTS) == "Speed"):
                         self.speed *= 3.5
-                        print("speed")
-                    if(choice(POWER_UP_EFFECTS) == "Camo"):
+                        print("Speed")
+                    elif(choice(POWER_UP_EFFECTS) == "Camo"):
                         # self.game.cooldown.cd = 5
                         mobcamo = True
-                        print("camo")
                         self.image.fill(RED)
+                        print("Camo")
+                        # if self.game.cooldown.cd < 1:
+                        #     mobcamo = False
+                        #     self.image.fill(GREEN)
+                    elif(choice(POWER_UP_EFFECTS) == "Invincible"):
+                        # self.game.cooldown.cd = 5
+                        self.image.fill(GOLD)
+                        print("Invincible")
+                        invincible = True
                         # if self.game.cooldown.cd < 1:
                         #     mobcamo = False
                         #     self.image.fill(GREEN)
                 if str(hits[0].__class__.__name__) == "Mob":
-                    print(hits[0].__class__.__name__)
-                    self.hitpoints -= 1
-                    self.speed = 150
-                    if(self.status == 'Invincible'):
-                        print("you cant hurt me")
+                    if invincible == False:
+                        self.hitpoints -= 1
+                        self.x = spawnx
+                        self.y = spawny
+                        if(self.speed > 150):
+                            self.speed -= 150
+                        elif (self.speed <= 150):
+                            self.speed -= 0
+                    elif invincible == True:
+                        pass
+
+                    if mobcamo == True:
+                        mobcamo = False
+                        self.image.fill(GREEN)
+                        if(invincible == True):
+                            self.image.fill(GOLD)
     
     # sprite updates
     def update(self):
@@ -116,6 +143,7 @@ class Player(pg.sprite.Sprite):
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
+        self.collide_with_group(self.game.mobs, True)
 
         coin_hits = pg.sprite.spritecollide(self, self.game.coins, True)
         if coin_hits:
@@ -221,21 +249,21 @@ class Mob(pg.sprite.Sprite):
             self.rect.y = self.y
             self.collide_with_walls('y')
         elif mobcamo == True:
-            # if self.game.cooldown.cd < 1:
-            pass
-            # if self.game.cooldown.cd < 1:
-            #                 self.x += self.vx * self.game.dt
-            # self.y += self.vy * self.game.dt
-            
-            # if self.rect.x < self.game.player1.rect.x:
-            #     self.vx = 100
-            # if self.rect.x > self.game.player1.rect.x:
-            #     self.vx = -100    
-            # if self.rect.y < self.game.player1.rect.y:
-            #     self.vy = 100
-            # if self.rect.y > self.game.player1.rect.y:
-            #     self.vy = -100
-            # self.rect.x = self.x
-            # self.collide_with_walls('x')
-            # self.rect.y = self.y
-            # self.collide_with_walls('y')
+                # if self.game.cooldown.cd < 1:
+                pass
+                # if self.game.cooldown.cd < 1:
+                #                 self.x += self.vx * self.game.dt
+                # self.y += self.vy * self.game.dt
+                
+                # if self.rect.x < self.game.player1.rect.x:
+                #     self.vx = 100
+                # if self.rect.x > self.game.player1.rect.x:
+                #     self.vx = -100    
+                # if self.rect.y < self.game.player1.rect.y:
+                #     self.vy = 100
+                # if self.rect.y > self.game.player1.rect.y:
+                #     self.vy = -100
+                # self.rect.x = self.x
+                # self.collide_with_walls('x')
+                # self.rect.y = self.y
+                # self.collide_with_walls('y')
