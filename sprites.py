@@ -12,6 +12,7 @@ mobcamo = False
 
 spawnx = 0
 spawny = 0
+mapno = 0
 
 invincible = False
 
@@ -87,6 +88,7 @@ class Player(pg.sprite.Sprite):
     def collide_with_group(self, group, kill):
             global mobcamo
             global invincible
+            global mapno
             hits = pg.sprite.spritecollide(self, group, kill)
             # code for collisions
             if hits:
@@ -94,19 +96,28 @@ class Player(pg.sprite.Sprite):
                     self.moneybag += 1
                 if str(hits[0].__class__.__name__) == "Powerup":
                     if(choice(POWER_UP_EFFECTS) == "Speed"):
-                        self.speed *= 3.5
-                        print("Speed")
+                        if(self.speed >= 1500):
+                            self.speed /= 2
+                        else:
+                            self.speed *= 3.5
                     elif(choice(POWER_UP_EFFECTS) == "Camo"):
                         # self.game.cooldown.cd = 5
-                        mobcamo = True
+                        if mobcamo == True:
+                            invincible = True
+                        else:
+                            mobcamo = True
                         self.image.fill(RED)
                         print("Camo")
                         # if self.game.cooldown.cd < 1:
                         #     mobcamo = False
                         #     self.image.fill(GREEN)
                     elif(choice(POWER_UP_EFFECTS) == "Invincible"):
+                        # if invincible == True:
+                        #     pass
                         # self.game.cooldown.cd = 5
                         self.image.fill(GOLD)
+                        if self.speed <= 300:
+                            self.speed = 300
                         print("Invincible")
                         invincible = True
                         # if self.game.cooldown.cd < 1:
@@ -114,7 +125,7 @@ class Player(pg.sprite.Sprite):
                         #     self.image.fill(GREEN)
                 if str(hits[0].__class__.__name__) == "Mob":
                     if invincible == False:
-                        self.hitpoints -= 1
+                        self.hitpoints -= 30
                         self.x = spawnx
                         self.y = spawny
                         if(self.speed > 150):
@@ -129,6 +140,20 @@ class Player(pg.sprite.Sprite):
                         self.image.fill(GREEN)
                         if(invincible == True):
                             self.image.fill(GOLD)
+                
+                if str(hits[0].__class__.__name__) == "mirrorMob":
+                    self.hitpoints -= 30
+                    self.x = spawnx
+                    self.y = spawny
+
+                if str(hits[0].__class__.__name__) == "Portal":
+                    if mapno == 0:
+                        mapno = 1
+                    if mapno == 1:
+                        mapno = 2
+                    elif mapno == 2:
+                        mapno = 3
+
     
     # sprite updates
     def update(self):
@@ -143,7 +168,8 @@ class Player(pg.sprite.Sprite):
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
-        self.collide_with_group(self.game.mobs, True)
+        self.collide_with_group(self.game.mobs, False)
+        self.collide_with_group(self.game.mirrormobs, False)
 
         coin_hits = pg.sprite.spritecollide(self, self.game.coins, True)
         if coin_hits:
@@ -169,6 +195,19 @@ class Coin(pg.sprite.Sprite):
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+class Portal(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.portals
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(PURPLE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -267,3 +306,67 @@ class Mob(pg.sprite.Sprite):
                 # self.collide_with_walls('x')
                 # self.rect.y = self.y
                 # self.collide_with_walls('y')
+
+class mirrorMob(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mirrormobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(CRIMSON)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.vx, self.vy = 100, 100
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.speed = 200
+    def collide_with_walls(self, dir):
+        if dir == 'x':
+            # print('colliding on the x')
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                self.vx *= -1
+                self.rect.x = self.x
+        if dir == 'y':
+            # print('colliding on the y')
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                self.vy *= -1
+                self.rect.y = self.y
+
+    def get_keys(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_LEFT] or keys[pg.K_a]:
+            self.vx = -self.speed  
+        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+            self.vx = self.speed  
+        if keys[pg.K_UP] or keys[pg.K_w]:
+            self.vy = -self.speed  
+        if keys[pg.K_DOWN] or keys[pg.K_s]:
+            self.vy = self.speed
+        if self.vx != 0 and self.vy != 0:
+            self.vx *= 0.7071
+            self.vy *= 0.7071
+
+    def update(self):
+            # self.get_keys()
+            # self.rect.x += 1
+            self.x += self.vx * self.game.dt
+            self.y += self.vy * self.game.dt
+            
+            if self.rect.x < self.game.player1.rect.x:
+                self.vx = 100
+            if self.rect.x > self.game.player1.rect.x:
+                self.vx = -100    
+            if self.rect.y < self.game.player1.rect.y:
+                self.vy = 100
+            if self.rect.y > self.game.player1.rect.y:
+                self.vy = -100
+            
+            self.get_keys()
+
+            self.rect.x = self.x
+            self.collide_with_walls('x')
+            self.rect.y = self.y
+            self.collide_with_walls('y')

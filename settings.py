@@ -22,6 +22,8 @@ BGCOLOR = (0, 0, 0)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 GOLD = (100, 84, 0)
+CRIMSON = (86, 8, 24)
+PURPLE = (255, 0, 255)
 
 POWER_UP_EFFECTS = ["Speed", "Camo", "Invincible"]
 

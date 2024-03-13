@@ -15,12 +15,12 @@ import sys
 from os import path
 import random
 
-ranmap = random.randint(0, 1)
+mapnum = mapno
 mapfile = ''
-if (ranmap == 0):
+if (mapnum == 0):
     mapfile = 'map.txt'
 
-if (ranmap == 1):
+if (mapnum == 1):
     mapfile = 'map2.txt'
 
 # Define game class...
@@ -67,6 +67,8 @@ class Game:
         self.coins = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+        self.mirrormobs = pg.sprite.Group()
+        self.portals = pg.sprite.Group()
         # self.power_ups1 = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
@@ -92,6 +94,10 @@ class Game:
                 #     Powerup1(self, col, row)
                 if tile == 'm':
                     Mob(self, col, row)
+                if tile == 'M':
+                    mirrorMob(self, col, row)
+                if tile == 'P':
+                    Portal(self, col, row)
 
     def run(self):
         # function to run the game
@@ -134,6 +140,7 @@ class Game:
                 self.quit()
         # code to handle key presses
             if event.type == pg.KEYDOWN:
+                pass
                 # if event.key == pg.K_SPACE:
                 #     self.vx = PLAYER_SPEED * 2
                 #     self.vy = PLAYER_SPEED * 2
