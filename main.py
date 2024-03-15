@@ -59,6 +59,44 @@ class Game:
                 # print(line)
                 self.map_data.append(line)
 
+    def change_level(self, mapfile):
+        # kill all existing sprites first to save memory
+        print("Hit portal")
+        for s in self.all_sprites:
+            s.kill()
+        # reset criteria for changing level
+        self.player1.moneybag = 0
+        # reset map data list to empty
+        self.map_data = []
+        # open next level
+        with open(path.join(self.game_folder, mapfile), 'rt') as f:
+            for line in f:
+                self.map_data.append(line)
+        # repopulate the level with stuff
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+# print(col)
+                # "1" character in map.txt creates a wall
+                if tile == '1':
+                    # print("a wall at", row, col)
+                    Wall(self, col, row)
+                # "p" caracter in map.txt defines the location of the player
+                if tile == 'p':
+                #    print("aaa")
+                   self.player1 = Player(self, col, row)
+                if tile == 'c':
+                    Coin(self, col, row)
+                if tile == 'u':
+                    Powerup(self, col, row)
+                # if tile == '':
+                #     Powerup1(self, col, row)
+                if tile == 'm':
+                    Mob(self, col, row)
+                if tile == 'M':
+                    mirrorMob(self, col, row)
+                if tile == 'P':
+                    Portal(self, col, row)
+
     # Create run method which runs the whole GAME
     def new(self):
         self.cooldown = Timer(self)
@@ -117,6 +155,8 @@ class Game:
     def update(self):
         self.cooldown.ticking()
         self.all_sprites.update()
+        if portalhit == True:
+            self.change_level(mapno)
     
     # function to draw the grid on the game
     def draw_grid(self):

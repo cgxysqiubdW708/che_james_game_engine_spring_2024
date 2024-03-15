@@ -13,12 +13,14 @@ mobcamo = False
 spawnx = 0
 spawny = 0
 mapno = 0
+playerspeed = 0
+portalhit = False
 
 invincible = False
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        global spawnx, spawny
+        global spawnx, spawny, playerspeed
         self.groups = game.all_sprites
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -35,6 +37,7 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.status = ''
         self.hitpoints = 100
+        playerspeed = self.speed
     
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -89,6 +92,8 @@ class Player(pg.sprite.Sprite):
             global mobcamo
             global invincible
             global mapno
+            global portalhit
+            global playerspeed
             hits = pg.sprite.spritecollide(self, group, kill)
             # code for collisions
             if hits:
@@ -98,8 +103,10 @@ class Player(pg.sprite.Sprite):
                     if(choice(POWER_UP_EFFECTS) == "Speed"):
                         if(self.speed >= 1500):
                             self.speed /= 2
+                            playerspeed = self.speed
                         else:
                             self.speed *= 3.5
+                            playerspeed = self.speed
                     elif(choice(POWER_UP_EFFECTS) == "Camo"):
                         # self.game.cooldown.cd = 5
                         if mobcamo == True:
@@ -112,8 +119,10 @@ class Player(pg.sprite.Sprite):
                         #     mobcamo = False
                         #     self.image.fill(GREEN)
                     elif(choice(POWER_UP_EFFECTS) == "Invincible"):
-                        # if invincible == True:
-                        #     pass
+                        if invincible == True:
+                            for a in self.game.mobs:
+                                a.kill()
+                             
                         # self.game.cooldown.cd = 5
                         self.image.fill(GOLD)
                         if self.speed <= 300:
@@ -147,12 +156,15 @@ class Player(pg.sprite.Sprite):
                     self.y = spawny
 
                 if str(hits[0].__class__.__name__) == "Portal":
+                    print("hit portal")
                     if mapno == 0:
-                        mapno = 1
+                        portalhit = True
+                        mapno = 'map2.txt'
                     if mapno == 1:
-                        mapno = 2
+                        portalhit = True
+                        mapno = 'map.txt'
                     elif mapno == 2:
-                        mapno = 3
+                        pass
 
     
     # sprite updates
@@ -170,6 +182,7 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.mobs, False)
         self.collide_with_group(self.game.mirrormobs, False)
+        self.collide_with_group(self.game.portals, False)
 
         coin_hits = pg.sprite.spritecollide(self, self.game.coins, True)
         if coin_hits:
@@ -257,18 +270,25 @@ class Mob(pg.sprite.Sprite):
         self.y = y * TILESIZE
         self.speed = 1
     def collide_with_walls(self, dir):
-        if dir == 'x':
-            # print('colliding on the x')
+         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                self.vx *= -1
+                if self.vx > 0:
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.vx < 0:
+                    self.x = hits[0].rect.right
+                self.vx = 0
                 self.rect.x = self.x
-        if dir == 'y':
-            # print('colliding on the y')
+         if dir == 'y':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                self.vy *= -1
+                if self.vy > 0:
+                    self.y = hits[0].rect.top - self.rect.height
+                if self.vy < 0:
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
                 self.rect.y = self.y
+
     def update(self):
         if mobcamo == False:
             # self.rect.x += 1
@@ -322,18 +342,25 @@ class mirrorMob(pg.sprite.Sprite):
         self.y = y * TILESIZE
         self.speed = 200
     def collide_with_walls(self, dir):
-        if dir == 'x':
-            # print('colliding on the x')
+         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                self.vx *= -1
+                if self.vx > 0:
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.vx < 0:
+                    self.x = hits[0].rect.right
+                self.vx = 0
                 self.rect.x = self.x
-        if dir == 'y':
-            # print('colliding on the y')
+         if dir == 'y':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                self.vy *= -1
+                if self.vy > 0:
+                    self.y = hits[0].rect.top - self.rect.height
+                if self.vy < 0:
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
                 self.rect.y = self.y
+
 
     def get_keys(self):
         keys = pg.key.get_pressed()
