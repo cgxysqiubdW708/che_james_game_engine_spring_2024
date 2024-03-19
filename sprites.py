@@ -12,12 +12,13 @@ mobcamo = False
 
 spawnx = 0
 spawny = 0
-mapno = 0
 playerspeed = 0
 portalhit = False
 
 invincible = False
 
+
+# player class with attributes
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         global spawnx, spawny, playerspeed
@@ -34,11 +35,13 @@ class Player(pg.sprite.Sprite):
         self.y = y * TILESIZE
         spawny = self.y
         self.moneybag = 0
+        self.portals = 0
         self.speed = 300
         self.status = ''
         self.hitpoints = 100
         playerspeed = self.speed
     
+    # key code to manipulate player
     def get_keys(self):
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
@@ -91,16 +94,20 @@ class Player(pg.sprite.Sprite):
     def collide_with_group(self, group, kill):
             global mobcamo
             global invincible
-            global mapno
             global portalhit
             global playerspeed
             hits = pg.sprite.spritecollide(self, group, kill)
             # code for collisions
             if hits:
+                # coin collisions
                 if str(hits[0].__class__.__name__) == "Coin":
                     self.moneybag += 1
+                # powerup collisions
                 if str(hits[0].__class__.__name__) == "Powerup":
+                    print(choice(POWER_UP_EFFECTS))
+                    # Randomization
                     if(choice(POWER_UP_EFFECTS) == "Speed"):
+                        # Speed powerup
                         if(self.speed >= 1500):
                             self.speed /= 2
                             playerspeed = self.speed
@@ -108,6 +115,7 @@ class Player(pg.sprite.Sprite):
                             self.speed *= 3.5
                             playerspeed = self.speed
                     elif(choice(POWER_UP_EFFECTS) == "Camo"):
+                        # Camo Powerup
                         # self.game.cooldown.cd = 5
                         if mobcamo == True:
                             invincible = True
@@ -119,6 +127,7 @@ class Player(pg.sprite.Sprite):
                         #     mobcamo = False
                         #     self.image.fill(GREEN)
                     elif(choice(POWER_UP_EFFECTS) == "Invincible"):
+                        # Invincibility Powerup
                         if invincible == True:
                             for a in self.game.mobs:
                                 a.kill()
@@ -133,7 +142,9 @@ class Player(pg.sprite.Sprite):
                         #     mobcamo = False
                         #     self.image.fill(GREEN)
                 if str(hits[0].__class__.__name__) == "Mob":
+                    # Mob collision
                     if invincible == False:
+                        # subtract hitpoints
                         self.hitpoints -= 30
                         self.x = spawnx
                         self.y = spawny
@@ -145,26 +156,21 @@ class Player(pg.sprite.Sprite):
                         pass
 
                     if mobcamo == True:
+                        # Invincibility loophole
                         mobcamo = False
                         self.image.fill(GREEN)
                         if(invincible == True):
                             self.image.fill(GOLD)
                 
                 if str(hits[0].__class__.__name__) == "mirrorMob":
+                    # Mirrormob collision code
                     self.hitpoints -= 30
                     self.x = spawnx
                     self.y = spawny
 
                 if str(hits[0].__class__.__name__) == "Portal":
-                    print("hit portal")
-                    if mapno == 0:
-                        portalhit = True
-                        mapno = 'map2.txt'
-                    if mapno == 1:
-                        portalhit = True
-                        mapno = 'map.txt'
-                    elif mapno == 2:
-                        pass
+                    # Portal collision code
+                    self.portals += 1
 
     
     # sprite updates
@@ -184,10 +190,12 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.mirrormobs, False)
         self.collide_with_group(self.game.portals, False)
 
+        # Add coins to moneybag
         coin_hits = pg.sprite.spritecollide(self, self.game.coins, True)
         if coin_hits:
             self.moneybag += 1
 
+# Wall code
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls
@@ -201,6 +209,7 @@ class Wall(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# Coin code
 class Coin(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.coins
@@ -214,6 +223,21 @@ class Coin(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# Spawn block code
+class spawnBlock(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.blocks
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+# Portal code
 class Portal(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.portals
@@ -227,6 +251,7 @@ class Portal(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# Powerup code
 class Powerup(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.power_ups
@@ -254,7 +279,6 @@ class Powerup(pg.sprite.Sprite):
 #         self.rect.y = y * TILESIZE
 
 # Mob code from Mr. Cozort's code
-        
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -327,6 +351,7 @@ class Mob(pg.sprite.Sprite):
                 # self.rect.y = self.y
                 # self.collide_with_walls('y')
 
+# Mirror mob code
 class mirrorMob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mirrormobs
@@ -340,7 +365,7 @@ class mirrorMob(pg.sprite.Sprite):
         self.vx, self.vy = 100, 100
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.speed = 200
+        self.speed = playerspeed
     def collide_with_walls(self, dir):
          if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -361,21 +386,22 @@ class mirrorMob(pg.sprite.Sprite):
                 self.vy = 0
                 self.rect.y = self.y
 
-
+    # Added to mimick player motion
     def get_keys(self):
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vx = -self.speed  
+            self.vx = -playerspeed
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vx = self.speed  
+            self.vx = playerspeed 
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vy = -self.speed  
+            self.vy = -playerspeed 
         if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vy = self.speed
+            self.vy = playerspeed
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071
 
+    # Update mirror mob
     def update(self):
             # self.get_keys()
             # self.rect.x += 1
@@ -383,13 +409,13 @@ class mirrorMob(pg.sprite.Sprite):
             self.y += self.vy * self.game.dt
             
             if self.rect.x < self.game.player1.rect.x:
-                self.vx = 100
+                self.vx = playerspeed
             if self.rect.x > self.game.player1.rect.x:
-                self.vx = -100    
+                self.vx = -playerspeed    
             if self.rect.y < self.game.player1.rect.y:
-                self.vy = 100
+                self.vy = playerspeed
             if self.rect.y > self.game.player1.rect.y:
-                self.vy = -100
+                self.vy = -playerspeed
             
             self.get_keys()
 

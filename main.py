@@ -15,8 +15,13 @@ import sys
 from os import path
 import random
 
-mapnum = mapno
+mapnum = 0
+MAPNO = 0
+playerspeed = 0
+print("reload")
 mapfile = ''
+mobnum = 0
+mobnum1 = 0
 if (mapnum == 0):
     mapfile = 'map.txt'
 
@@ -35,6 +40,8 @@ class Game:
         # setting game clock 
         self.clock = pg.time.Clock()
         self.load_data()
+        self.mirror_mob_spawned = False
+        self.mob_spawned = False
      # code to load text file containing game board
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -60,16 +67,26 @@ class Game:
                 self.map_data.append(line)
 
     def change_level(self, mapfile):
+        game_folder = path.dirname(__file__)
         # kill all existing sprites first to save memory
-        print("Hit portal")
+        global MAPNO
+        print("hit portal")
+        MAPNO += 1
+        print(MAPNO)
         for s in self.all_sprites:
             s.kill()
+        if MAPNO == 1:
+            mapfile = 'map2.txt'
+        if MAPNO == 2:
+            mapfile = 'map3.txt'
+        elif MAPNO == 3:
+            mapfile = 'map3.txt'
         # reset criteria for changing level
         self.player1.moneybag = 0
         # reset map data list to empty
         self.map_data = []
         # open next level
-        with open(path.join(self.game_folder, mapfile), 'rt') as f:
+        with open(path.join(game_folder, mapfile), 'rt') as f:
             for line in f:
                 self.map_data.append(line)
         # repopulate the level with stuff
@@ -86,13 +103,15 @@ class Game:
                    self.player1 = Player(self, col, row)
                 if tile == 'c':
                     Coin(self, col, row)
+                if tile == 'b':
+                    spawnBlock(self, col, row)
                 if tile == 'u':
                     Powerup(self, col, row)
                 # if tile == '':
                 #     Powerup1(self, col, row)
-                if tile == 'm':
+                if tile == 'm' and MAPNO <= 2:
                     Mob(self, col, row)
-                if tile == 'M':
+                if tile == 'M' and MAPNO >= 2 and self.player1.y >= 450:
                     mirrorMob(self, col, row)
                 if tile == 'P':
                     Portal(self, col, row)
@@ -103,6 +122,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
+        self.blocks = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.mirrormobs = pg.sprite.Group()
@@ -126,14 +146,16 @@ class Game:
                    self.player1 = Player(self, col, row)
                 if tile == 'c':
                     Coin(self, col, row)
+                if tile == 'b':
+                    spawnBlock(self, col, row)
                 if tile == 'u':
                     Powerup(self, col, row)
                 # if tile == '':
                 #     Powerup1(self, col, row)
-                if tile == 'm':
+                if tile == 'm' and MAPNO < 2:
                     Mob(self, col, row)
-                if tile == 'M':
-                    mirrorMob(self, col, row)
+                # if tile == 'M':
+                #     mirrorMob(self, col, row)
                 if tile == 'P':
                     Portal(self, col, row)
 
@@ -153,10 +175,36 @@ class Game:
 
     # function to update the game
     def update(self):
+        global playerspeed
         self.cooldown.ticking()
+        if self.player1.hitpoints < 1:
+                self.playing = False
         self.all_sprites.update()
-        if portalhit == True:
-            self.change_level(mapno)
+        playerspeed = self.player1.speed
+        global mobnum
+        global mobnum1
+
+        # Partially inspired by ChatGPT
+        hits1 = pg.sprite.spritecollide(self.player1, self.blocks, False)
+        if hits1:
+            print("hit")
+            # Spawn MirrorMob when the player collides with a false coin
+            for row, tiles in enumerate(self.map_data):
+                for col, tile in enumerate(tiles):
+                    if tile == 'M' and MAPNO >= 2 and not self.mirror_mob_spawned:
+                        mirrorMob(self, col, row)
+                        mobnum += 1
+                        if mobnum >= 6:
+                            self.mirror_mob_spawned = True
+                    if tile == 'm' and MAPNO >= 2 and not self.mob_spawned:
+                        Mob(self, col, row)
+                        mobnum1 += 1
+                        if mobnum >= 5:
+                            self.mob_spawned = True
+
+        # change maps
+        if self.player1.portals >= 2:
+            self.change_level(MAPNO)
     
     # function to draw the grid on the game
     def draw_grid(self):
