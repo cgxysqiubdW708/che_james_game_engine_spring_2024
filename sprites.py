@@ -223,7 +223,7 @@ class Coin(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-# Spawn block code
+# Spawn block code (Also false coin)
 class spawnBlock(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.blocks
