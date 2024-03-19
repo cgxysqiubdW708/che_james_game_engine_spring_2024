@@ -184,7 +184,7 @@ class Game:
         global mobnum
         global mobnum1
 
-        # Partially inspired by ChatGPT
+        # Partially inspired by ChatGPT with prompt: "Create code to spawn a pygame sprite if the player collides with another sprite"
         hits1 = pg.sprite.spritecollide(self.player1, self.blocks, False)
         if hits1:
             print("hit")
