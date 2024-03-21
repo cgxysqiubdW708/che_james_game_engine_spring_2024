@@ -6,6 +6,8 @@ from settings import *
 from random import choice
 from utils import *
 
+vec = pg.math.Vector2
+
 # player sprite
 
 mobcamo = False
@@ -16,6 +18,27 @@ playerspeed = 0
 portalhit = False
 
 invincible = False
+
+# Code from Mr. Cozort
+def collide_with_walls(sprite, group, dir):
+    if dir == 'x':
+        hits = pg.sprite.spritecollide(sprite, group, False)
+        if hits:
+            if hits[0].rect.centerx > sprite.rect.centerx:
+                sprite.pos.x = hits[0].rect.left - sprite.rect.width / 2
+            if hits[0].rect.centerx < sprite.rect.centerx:
+                sprite.pos.x = hits[0].rect.right + sprite.rect.width / 2
+            sprite.vel.x = 0
+            sprite.rect.centerx = sprite.pos.x
+    if dir == 'y':
+        hits = pg.sprite.spritecollide(sprite, group, False)
+        if hits:
+            if hits[0].rect.centery > sprite.rect.centery:
+                sprite.pos.y = hits[0].rect.top - sprite.rect.height / 2
+            if hits[0].rect.centery < sprite.rect.centery:
+                sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
+            sprite.vel.y = 0
+            sprite.rect.centery = sprite.pos.y
 
 
 # player class with attributes
@@ -40,6 +63,8 @@ class Player(pg.sprite.Sprite):
         self.status = ''
         self.hitpoints = 100
         playerspeed = self.speed
+        self.pos = vec(0,0)
+        self.dir = vec(0,0)
     
     # key code to manipulate player
     def get_keys(self):
@@ -281,75 +306,94 @@ class Powerup(pg.sprite.Sprite):
 # Mob code from Mr. Cozort's code
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.mobs
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.vx, self.vy = 100, 100
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
-        self.speed = 1
-    def collide_with_walls(self, dir):
-         if dir == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                if self.vx > 0:
-                    self.x = hits[0].rect.left - self.rect.width
-                if self.vx < 0:
-                    self.x = hits[0].rect.right
-                self.vx = 0
-                self.rect.x = self.x
-         if dir == 'y':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                if self.vy > 0:
-                    self.y = hits[0].rect.top - self.rect.height
-                if self.vy < 0:
-                    self.y = hits[0].rect.bottom
-                self.vy = 0
-                self.rect.y = self.y
-
+            self.groups = game.all_sprites, game.mobs
+            pg.sprite.Sprite.__init__(self, self.groups)
+            self.game = game
+            # self.image = game.mob_img
+            # self.image = pg.Surface((TILESIZE, TILESIZE))
+            # self.image.fill(ORANGE)
+            self.image = pg.Surface((TILESIZE, TILESIZE))
+            self.image.fill(RED)
+            self.rect = self.image.get_rect()
+            # self.hit_rect = MOB_HIT_RECT.copy()
+            # self.hit_rect.center = self.rect.center
+            self.pos = vec(x, y) * TILESIZE
+            self.vel = vec(0, 0)
+            self.acc = vec(0, 0)
+            self.rect.center = self.pos
+            self.rot = 0
+            self.chase_distance = 500
+            # added
+            self.speed = 150
+            self.chasing = False
+            # self.health = MOB_HEALTH
+            self.hitpoints = 5
+    # Follow player
+    def sensor(self):
+            if abs(self.rect.x - self.game.player1.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player1.rect.y) < self.chase_distance:
+                self.chasing = True
+            else:
+                self.chasing = False
+    # Update sprite and handle motion
     def update(self):
-        if mobcamo == False:
-            # self.rect.x += 1
-            self.x += self.vx * self.game.dt
-            self.y += self.vy * self.game.dt
-            
-            if self.rect.x < self.game.player1.rect.x:
-                self.vx = 100
-            if self.rect.x > self.game.player1.rect.x:
-                self.vx = -100    
-            if self.rect.y < self.game.player1.rect.y:
-                self.vy = 100
-            if self.rect.y > self.game.player1.rect.y:
-                self.vy = -100
-            self.rect.x = self.x
-            self.collide_with_walls('x')
-            self.rect.y = self.y
-            self.collide_with_walls('y')
-        elif mobcamo == True:
-                # if self.game.cooldown.cd < 1:
-                pass
-                # if self.game.cooldown.cd < 1:
-                #                 self.x += self.vx * self.game.dt
-                # self.y += self.vy * self.game.dt
+            if self.hitpoints < 1:
+                print("mob2 should be dead")
+                self.kill()
+            self.sensor()
+            if self.chasing:
+                self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
+                # self.image = pg.transform.rotate(self.image, 45)
+                # self.rect = self.image.get_rect()
+                self.rect.center = self.pos
+                self.acc = vec(self.speed, 0).rotate(-self.rot)
+                self.acc += self.vel * -1
+                self.vel += self.acc * self.game.dt
+                self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+                # self.hit_rect.centerx = self.pos.x
+                collide_with_walls(self, self.game.walls, 'x')
+                # self.hit_rect.centery = self.pos.y
+                collide_with_walls(self, self.game.walls, 'y')
+                # self.rect.center = self.hit_rect.center
+                # if self.health <= 0:
+                #     self.kill()
+
+        # def update(self):
+        #     if mobcamo == False:
+        #         # self.rect.x += 1
+        #         self.x += self.vx * self.game.dt
+        #         self.y += self.vy * self.game.dt
                 
-                # if self.rect.x < self.game.player1.rect.x:
-                #     self.vx = 100
-                # if self.rect.x > self.game.player1.rect.x:
-                #     self.vx = -100    
-                # if self.rect.y < self.game.player1.rect.y:
-                #     self.vy = 100
-                # if self.rect.y > self.game.player1.rect.y:
-                #     self.vy = -100
-                # self.rect.x = self.x
-                # self.collide_with_walls('x')
-                # self.rect.y = self.y
-                # self.collide_with_walls('y')
+        #         if self.rect.x < self.game.player1.rect.x:
+        #             self.vx = 100
+        #         if self.rect.x > self.game.player1.rect.x:
+        #             self.vx = -100    
+        #         if self.rect.y < self.game.player1.rect.y:
+        #             self.vy = 100
+        #         if self.rect.y > self.game.player1.rect.y:
+        #             self.vy = -100
+        #         self.rect.x = self.x
+        #         self.collide_with_walls('x')
+        #         self.rect.y = self.y
+        #         self.collide_with_walls('y')
+        #     elif mobcamo == True:
+        #             # if self.game.cooldown.cd < 1:
+        #             pass
+        #             # if self.game.cooldown.cd < 1:
+        #             #                 self.x += self.vx * self.game.dt
+        #             # self.y += self.vy * self.game.dt
+                    
+        #             # if self.rect.x < self.game.player1.rect.x:
+        #             #     self.vx = 100
+        #             # if self.rect.x > self.game.player1.rect.x:
+        #             #     self.vx = -100    
+        #             # if self.rect.y < self.game.player1.rect.y:
+        #             #     self.vy = 100
+        #             # if self.rect.y > self.game.player1.rect.y:
+        #             #     self.vy = -100
+        #             # self.rect.x = self.x
+        #             # self.collide_with_walls('x')
+        #             # self.rect.y = self.y
+        #             # self.collide_with_walls('y')
 
 # Mirror mob code
 class mirrorMob(pg.sprite.Sprite):
@@ -366,6 +410,7 @@ class mirrorMob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = playerspeed
+    # Wall collision code
     def collide_with_walls(self, dir):
          if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -387,6 +432,7 @@ class mirrorMob(pg.sprite.Sprite):
                 self.rect.y = self.y
 
     # Added to mimick player motion
+    # Copied from Player class
     def get_keys(self):
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:

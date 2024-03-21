@@ -46,6 +46,7 @@ class Game:
     def load_data(self):
         game_folder = path.dirname(__file__)
         self.map_data = []
+        self.mirror_mob_spawned = False
         # 'r'     open for reading (default)
         # 'w'     open for writing, truncating the file first
         # 'x'     open for exclusive creation, failing if the file already exists
@@ -67,6 +68,7 @@ class Game:
                 self.map_data.append(line)
 
     def change_level(self, mapfile):
+        self.mirror_mob_spawned = False
         game_folder = path.dirname(__file__)
         # kill all existing sprites first to save memory
         global MAPNO
@@ -179,10 +181,12 @@ class Game:
         self.cooldown.ticking()
         if self.player1.hitpoints < 1:
                 self.playing = False
+                self.mirror_mob_spawned = False
         self.all_sprites.update()
         playerspeed = self.player1.speed
         global mobnum
         global mobnum1
+        mobnum = 0
 
         # Partially inspired by ChatGPT with prompt: "Create code to spawn a pygame sprite if the player collides with another sprite"
         hits1 = pg.sprite.spritecollide(self.player1, self.blocks, False)
