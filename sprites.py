@@ -396,44 +396,33 @@ class Mob(pg.sprite.Sprite):
         #             # self.collide_with_walls('y')
 
 # Mirror mob code
+# Updated with Mr. Cozort's new mob movement code
 class mirrorMob(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.mirrormobs
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(CRIMSON)
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.vx, self.vy = 100, 100
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
-        self.speed = playerspeed
-    # Wall collision code
-    def collide_with_walls(self, dir):
-         if dir == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                if self.vx > 0:
-                    self.x = hits[0].rect.left - self.rect.width
-                if self.vx < 0:
-                    self.x = hits[0].rect.right
-                self.vx = 0
-                self.rect.x = self.x
-         if dir == 'y':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                if self.vy > 0:
-                    self.y = hits[0].rect.top - self.rect.height
-                if self.vy < 0:
-                    self.y = hits[0].rect.bottom
-                self.vy = 0
-                self.rect.y = self.y
-
-    # Added to mimick player motion
+ def __init__(self, game, x, y):
+            self.groups = game.all_sprites, game.mirrormobs
+            pg.sprite.Sprite.__init__(self, self.groups)
+            self.game = game
+            # self.image = game.mob_img
+            # self.image = pg.Surface((TILESIZE, TILESIZE))
+            # self.image.fill(ORANGE)
+            self.image = pg.Surface((TILESIZE, TILESIZE))
+            self.image.fill(RED)
+            self.rect = self.image.get_rect()
+            # self.hit_rect = MOB_HIT_RECT.copy()
+            # self.hit_rect.center = self.rect.center
+            self.pos = vec(x, y) * TILESIZE
+            self.vel = vec(0, 0)
+            self.acc = vec(0, 0)
+            self.rect.center = self.pos
+            self.rot = 0
+            self.chase_distance = 500
+            # added
+            self.speed = 150
+            self.chasing = False
+            # self.health = MOB_HEALTH
+            self.hitpoints = 5
     # Copied from Player class
-    def get_keys(self):
+def get_keys(self):
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -playerspeed
@@ -448,24 +437,32 @@ class mirrorMob(pg.sprite.Sprite):
             self.vy *= 0.7071
 
     # Update mirror mob
-    def update(self):
-            # self.get_keys()
-            # self.rect.x += 1
-            self.x += self.vx * self.game.dt
-            self.y += self.vy * self.game.dt
-            
-            if self.rect.x < self.game.player1.rect.x:
-                self.vx = playerspeed
-            if self.rect.x > self.game.player1.rect.x:
-                self.vx = -playerspeed    
-            if self.rect.y < self.game.player1.rect.y:
-                self.vy = playerspeed
-            if self.rect.y > self.game.player1.rect.y:
-                self.vy = -playerspeed
-            
-            self.get_keys()
-
-            self.rect.x = self.x
-            self.collide_with_walls('x')
-            self.rect.y = self.y
-            self.collide_with_walls('y')
+    # Follow player
+def sensor(self):
+            if abs(self.rect.x - self.game.player1.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player1.rect.y) < self.chase_distance:
+                self.chasing = True
+            else:
+                self.chasing = False
+    # Update sprite and handle motion
+def update(self):
+            if self.hitpoints < 1:
+                print("mob2 should be dead")
+                self.kill()
+            self.sensor()
+            if self.chasing:
+                self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
+                # self.image = pg.transform.rotate(self.image, 45)
+                # self.rect = self.image.get_rect()
+                self.rect.center = self.pos
+                self.acc = vec(self.speed, 0).rotate(-self.rot)
+                self.acc += self.vel * -1
+                self.vel += self.acc * self.game.dt
+                self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+                # self.hit_rect.centerx = self.pos.x
+                collide_with_walls(self, self.game.walls, 'x')
+                self.get_keys()
+                # self.hit_rect.centery = self.pos.y
+                collide_with_walls(self, self.game.walls, 'y')
+                # self.rect.center = self.hit_rect.center
+                # if self.health <= 0:
+                #     self.kill()
