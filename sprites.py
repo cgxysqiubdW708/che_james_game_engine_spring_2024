@@ -398,7 +398,8 @@ class Mob(pg.sprite.Sprite):
 # Mirror mob code
 # Updated with Mr. Cozort's new mob movement code
 class mirrorMob(pg.sprite.Sprite):
- def __init__(self, game, x, y):
+    def __init__(self, game, x, y):
+            print("1")
             self.groups = game.all_sprites, game.mirrormobs
             pg.sprite.Sprite.__init__(self, self.groups)
             self.game = game
@@ -406,7 +407,7 @@ class mirrorMob(pg.sprite.Sprite):
             # self.image = pg.Surface((TILESIZE, TILESIZE))
             # self.image.fill(ORANGE)
             self.image = pg.Surface((TILESIZE, TILESIZE))
-            self.image.fill(RED)
+            self.image.fill(CRIMSON)
             self.rect = self.image.get_rect()
             # self.hit_rect = MOB_HIT_RECT.copy()
             # self.hit_rect.center = self.rect.center
@@ -417,39 +418,42 @@ class mirrorMob(pg.sprite.Sprite):
             self.rot = 0
             self.chase_distance = 500
             # added
-            self.speed = 150
+            self.speed = playerspeed
             self.chasing = False
             # self.health = MOB_HEALTH
             self.hitpoints = 5
     # Copied from Player class
-def get_keys(self):
-        keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vx = -playerspeed
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vx = playerspeed 
-        if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vy = -playerspeed 
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vy = playerspeed
-        if self.vx != 0 and self.vy != 0:
-            self.vx *= 0.7071
-            self.vy *= 0.7071
+# def get_keys(self):
+#         keys = pg.key.get_pressed()
+#         if keys[pg.K_LEFT] or keys[pg.K_a]:
+#             self.vx = -playerspeed
+#         if keys[pg.K_RIGHT] or keys[pg.K_d]:
+#             self.vx = playerspeed 
+#         if keys[pg.K_UP] or keys[pg.K_w]:
+#             self.vy = -playerspeed 
+#         if keys[pg.K_DOWN] or keys[pg.K_s]:
+#             self.vy = playerspeed
+#         if self.vx != 0 and self.vy != 0:
+#             self.vx *= 0.7071
+#             self.vy *= 0.7071
 
     # Update mirror mob
     # Follow player
-def sensor(self):
+    def sensor(self):
+            print("2")
             if abs(self.rect.x - self.game.player1.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player1.rect.y) < self.chase_distance:
                 self.chasing = True
             else:
                 self.chasing = False
     # Update sprite and handle motion
-def update(self):
+    def update(self):
+            print("3")
             if self.hitpoints < 1:
                 print("mob2 should be dead")
                 self.kill()
             self.sensor()
             if self.chasing:
+                print("4")
                 self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
                 # self.image = pg.transform.rotate(self.image, 45)
                 # self.rect = self.image.get_rect()
@@ -460,9 +464,10 @@ def update(self):
                 self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
                 # self.hit_rect.centerx = self.pos.x
                 collide_with_walls(self, self.game.walls, 'x')
-                self.get_keys()
+                # self.get_keys()
                 # self.hit_rect.centery = self.pos.y
                 collide_with_walls(self, self.game.walls, 'y')
+                print("5")
                 # self.rect.center = self.hit_rect.center
                 # if self.health <= 0:
                 #     self.kill()

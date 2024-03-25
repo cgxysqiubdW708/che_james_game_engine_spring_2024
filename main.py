@@ -78,7 +78,7 @@ class Game:
         for s in self.all_sprites:
             s.kill()
         if MAPNO == 1:
-            mapfile = 'map2.txt'
+            mapfile = 'map3.txt'
         if MAPNO == 2:
             mapfile = 'map3.txt'
         elif MAPNO == 3:
@@ -195,7 +195,7 @@ class Game:
             # Spawn MirrorMob when the player collides with a false coin
             for row, tiles in enumerate(self.map_data):
                 for col, tile in enumerate(tiles):
-                    if tile == 'M' and MAPNO >= 2 and not self.mirror_mob_spawned:
+                    if tile == 'M' and MAPNO >= 1 and not self.mirror_mob_spawned:
                         mirrorMob(self, col, row)
                         mobnum += 1
                         if mobnum >= 6:
